@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from 'bcrypt';
 import User from '../Databases/userSchema.js';
 const router = express.Router();
 
@@ -12,7 +13,8 @@ router.post('/login', async(req,res)=>{
         if(!user){
             return res.status(401).json({message: 'Invalid username or password'});
         }
-        if(user.password !== password){
+        const isMatch = await bcrypt.compare(password, user[0].password);
+        if(!isMatch){
             return res.status(401).json({message: 'Invalid username or password'});
         }
         return res.status(200).json({message: 'Login successful', user});
@@ -33,7 +35,9 @@ router.post('/register', async(req,res)=>{
         if(user){
             return res.status(409).json({message: 'User already exists'});
         }
-        const newUser = new User({username, password});
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const newUser = new User({username, hashedPassword});
         await newUser.save();
         return res.status(201).json({message: 'User created successfully', user: newUser});
     }
@@ -54,5 +58,6 @@ router.get('/users', async(req,res)=>{
         return res.status(500).json({message: 'Server not responding', error: error.message});
     }
 })
+
 
 export default router;

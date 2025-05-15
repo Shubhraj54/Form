@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 
 const formSchema = new mongoose.schema({
     userId :{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        // type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        // ref: 'User',
         required: true,
     },
     message: {
